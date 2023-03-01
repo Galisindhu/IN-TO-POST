@@ -1,0 +1,105 @@
+#include<stdio.h>
+#include<string.h>
+
+char stack[25];                                          //char stack                      
+int top = -1;                                            //assigning top = -1
+
+void push(char item) {                                   //push operation to insert an item
+  stack[++top] = item;
+}
+
+char pop() {                                             //pop operation to delete an item
+  return stack[top--];
+}
+
+int precedence(char symbol)                              //returns precedence of operators
+{
+    switch(symbol)
+    {
+        case '+':                                        // + and - operators are given precedence 2
+        case '-': return 2;
+                  break;
+        case '*':                                        // * and / operators are given precedence 3
+        case '/': return 3;  
+                  break;
+        case '^': return 4;                             // ^ operator are given precedence 4
+                  break;
+        case '(':                                       // (, )and # operators are given precedence 1
+        case ')':
+        case '#': return 1;
+                  break;
+    }
+}
+
+//check whether the symbol is operator?
+int isOperator(char symbol) {
+   switch(symbol) {
+      case '+':
+      case '-':
+      case '*':
+      case '/':
+      case '^':
+      case '(':
+      case ')':
+         return 1;                                       //if operators are in infix expression then return 1
+      break;
+         default:                                        //if operand return 0
+         return 0;
+   }
+}
+
+void convert(char infix[],char postfix[]) {              //converts infix expression to postfix
+
+   int i,symbol,j = 0;                                  
+   stack[++top] = '#';                                   //assigning symbol # on the of top of the stack
+
+   for(i = 0;i<strlen(infix);i++) {
+      symbol = infix[i];                                
+
+      if(isOperator(symbol) == 0) {                     //operand is sent to output
+         postfix[j] = symbol;
+         j++;
+      } else {
+         if(symbol == '(') {                            //operator ( pushed into the stack
+            push(symbol);
+         } else {
+            if(symbol == ')') {                        
+
+               while(stack[top] != '(') {               //if operator is ) then pop all the operators till ( is found
+                  postfix[j] = pop();
+                  j++;
+               }
+
+               pop();                                   //pop out (.
+            } else {
+               if(precedence(symbol)>precedence(stack[top])) {             //if precedence of symbol is greater than precedence of
+                  push(symbol);                                            // top of the stack then push the symbol
+               } else {
+
+                  while(precedence(symbol)<=precedence(stack[top])) {      //if precedence of symbol is smaller than precedence of
+                     postfix[j] = pop();                                   // top of the stack then pop the symbol
+                     j++;
+                  }
+
+                  push(symbol);                                            //push the symbol
+               }
+            }
+         }
+      }
+   }
+
+   while(stack[top] != '#') {                                             //pops out all the operators till # is found
+      postfix[j] = pop();
+      j++;
+   }
+
+   postfix[j]='\0';                                                      //null terminate string.
+}
+
+void main() {
+  char infix[25] = "1*(2+3)",postfix[25];                          
+  convert(infix,postfix);                                           //function to convert infix to postfix
+
+  printf("Infix expression is: %s\n" , infix);
+  printf("Postfix expression is: %s\n" , postfix);                  
+} 
